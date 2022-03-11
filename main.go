@@ -21,8 +21,8 @@ func main() {
 		downstreamClusterEC2Size := conf.Get("downstreamClusterEC2Size")
 		fleetClustersEC2Size := conf.Get("fleetClustersEC2Size")
 
-		cloudcredential, err := rancher2.NewCloudCredential(ctx, "david-pulumi-cloudcredential", &rancher2.CloudCredentialArgs{
-			Name:        pulumi.String("david-pulumi-aws"),
+		cloudcredential, err := rancher2.NewCloudCredential(ctx, "nelson-pulumi-cloudcredential", &rancher2.CloudCredentialArgs{
+			Name:        pulumi.String("nelson-pulumi-aws"),
 			Description: pulumi.String("AWS credentials"),
 			Amazonec2CredentialConfig: &rancher2.CloudCredentialAmazonec2CredentialConfigArgs{
 				AccessKey: ec2AccessKey,
@@ -34,9 +34,9 @@ func main() {
 		}
 
 		// Create AWS VPC
-		vpc, err := ec2.NewVpc(ctx, "david-pulumi-vpc", &ec2.VpcArgs{
+		vpc, err := ec2.NewVpc(ctx, "nelson-pulumi-vpc", &ec2.VpcArgs{
 			CidrBlock:          pulumi.String("10.0.0.0/16"),
-			Tags:               pulumi.StringMap{"Name": pulumi.String("david-pulumi-vpc")},
+			Tags:               pulumi.StringMap{"Name": pulumi.String("nelson-pulumi-vpc")},
 			EnableDnsHostnames: pulumi.Bool(true),
 			EnableDnsSupport:   pulumi.Bool(true),
 		})
@@ -46,7 +46,7 @@ func main() {
 		}
 
 		// Create IGW
-		igw, err := ec2.NewInternetGateway(ctx, "david-pulumi-gw", &ec2.InternetGatewayArgs{
+		igw, err := ec2.NewInternetGateway(ctx, "nelson-pulumi-gw", &ec2.InternetGatewayArgs{
 			VpcId: vpc.ID(),
 		})
 
@@ -55,9 +55,9 @@ func main() {
 		}
 
 		// Create AWS security group
-		sg, err := ec2.NewSecurityGroup(ctx, "david-pulumi-sg", &ec2.SecurityGroupArgs{
+		sg, err := ec2.NewSecurityGroup(ctx, "nelson-pulumi-sg", &ec2.SecurityGroupArgs{
 			Description: pulumi.String("Security group for ec2 Nodes"),
-			Name:        pulumi.String("david-pulumi-sg"),
+			Name:        pulumi.String("nelson-pulumi-sg"),
 			VpcId:       vpc.ID(),
 
 			Ingress: ec2.SecurityGroupIngressArray{
@@ -100,9 +100,9 @@ func main() {
 
 		// Iterate through the AZ's for the VPC and create a subnet in each
 		for i := 0; i < zoneNumber; i++ {
-			subnet, err := ec2.NewSubnet(ctx, "david-pulumi-subnet-"+strconv.Itoa(i), &ec2.SubnetArgs{
+			subnet, err := ec2.NewSubnet(ctx, "nelson-pulumi-subnet-"+strconv.Itoa(i), &ec2.SubnetArgs{
 				AvailabilityZone:    pulumi.String(zoneList.Names[i]),
-				Tags:                pulumi.StringMap{"Name": pulumi.String("david-pulumi-subnet-" + strconv.Itoa(i))},
+				Tags:                pulumi.StringMap{"Name": pulumi.String("nelson-pulumi-subnet-" + strconv.Itoa(i))},
 				VpcId:               vpc.ID(),
 				CidrBlock:           pulumi.String("10.0." + strconv.Itoa(i) + ".0/24"),
 				MapPublicIpOnLaunch: pulumi.Bool(true),
@@ -116,7 +116,7 @@ func main() {
 		}
 
 		// Add Route Table
-		_, err = ec2.NewDefaultRouteTable(ctx, "david-pulumi-routetable", &ec2.DefaultRouteTableArgs{
+		_, err = ec2.NewDefaultRouteTable(ctx, "nelson-pulumi-routetable", &ec2.DefaultRouteTableArgs{
 			DefaultRouteTableId: vpc.DefaultRouteTableId,
 			Routes: ec2.DefaultRouteTableRouteArray{
 				ec2.DefaultRouteTableRouteInput(&ec2.DefaultRouteTableRouteArgs{
@@ -138,8 +138,8 @@ func main() {
 
 			for i := 0; i < 3; i++ {
 
-				machineConfig, err := rancher2.NewMachineConfigV2(ctx, "david-pulumi-downstream-"+strconv.Itoa(i), &rancher2.MachineConfigV2Args{
-					GenerateName: pulumi.String("david-pulumi-machineconf-downstream-" + strconv.Itoa(i)),
+				machineConfig, err := rancher2.NewMachineConfigV2(ctx, "nelson-pulumi-downstream-"+strconv.Itoa(i), &rancher2.MachineConfigV2Args{
+					GenerateName: pulumi.String("nelson-pulumi-machineconf-downstream-" + strconv.Itoa(i)),
 					Amazonec2Config: &rancher2.MachineConfigV2Amazonec2ConfigArgs{
 						Ami:            pulumi.String("ami-0ff4c8fb495a5a50d"),
 						InstanceType:   pulumi.String(downstreamClusterEC2Size),
@@ -174,10 +174,10 @@ func main() {
 				machinePools = append(machinePools, machinePool)
 			}
 
-			cluster, err := rancher2.NewClusterV2(ctx, "davidh-pulumi-cluster-downstream", &rancher2.ClusterV2Args{
+			cluster, err := rancher2.NewClusterV2(ctx, "nelsonh-pulumi-cluster-downstream", &rancher2.ClusterV2Args{
 				CloudCredentialSecretName:           cloudcredential.ID(),
 				KubernetesVersion:                   pulumi.String("v1.21.5+rke2r2"),
-				Name:                                pulumi.String("david-pulumi-downstream"),
+				Name:                                pulumi.String("nelson-pulumi-downstream"),
 				DefaultClusterRoleForProjectMembers: pulumi.String("user"),
 				RkeConfig: &rancher2.ClusterV2RkeConfigArgs{
 					MachinePools: rancher2.ClusterV2RkeConfigMachinePoolArray{
@@ -189,7 +189,7 @@ func main() {
 			})
 
 			// Required to help sync objects
-			clusterSync, err := rancher2.NewClusterSync(ctx, "david-clustersync", &rancher2.ClusterSyncArgs{
+			clusterSync, err := rancher2.NewClusterSync(ctx, "nelson-clustersync", &rancher2.ClusterSyncArgs{
 				ClusterId:    cluster.ClusterV1Id,
 				WaitCatalogs: pulumi.Bool(true),
 				// Wait a couple of minutes for the cluster to be up before installing addons.
@@ -329,8 +329,8 @@ func main() {
 			// create some EC2 instances to install K3s on:
 			for i := 0; i < 3; i++ {
 
-				machineConfig, err := rancher2.NewMachineConfigV2(ctx, "david-pulumi-fleet-machineconf-"+strconv.Itoa(i), &rancher2.MachineConfigV2Args{
-					GenerateName: pulumi.String("david-pulumi-fleet-machineconf-" + strconv.Itoa(i)),
+				machineConfig, err := rancher2.NewMachineConfigV2(ctx, "nelson-pulumi-fleet-machineconf-"+strconv.Itoa(i), &rancher2.MachineConfigV2Args{
+					GenerateName: pulumi.String("nelson-pulumi-fleet-machineconf-" + strconv.Itoa(i)),
 					Amazonec2Config: &rancher2.MachineConfigV2Amazonec2ConfigArgs{
 						Ami:            pulumi.String("ami-0ff4c8fb495a5a50d"),
 						InstanceType:   pulumi.String(fleetClustersEC2Size),
@@ -342,10 +342,10 @@ func main() {
 					},
 				})
 
-				_, err = rancher2.NewClusterV2(ctx, "davidh-pulumi-cluster-"+strconv.Itoa(i), &rancher2.ClusterV2Args{
+				_, err = rancher2.NewClusterV2(ctx, "nelsonh-pulumi-cluster-"+strconv.Itoa(i), &rancher2.ClusterV2Args{
 					CloudCredentialSecretName:           cloudcredential.ID(),
 					KubernetesVersion:                   pulumi.String("v1.21.4+k3s1"),
-					Name:                                pulumi.String("david-pulumi-fleet-" + strconv.Itoa(i)),
+					Name:                                pulumi.String("nelson-pulumi-fleet-" + strconv.Itoa(i)),
 					DefaultClusterRoleForProjectMembers: pulumi.String("user"),
 					RkeConfig: &rancher2.ClusterV2RkeConfigArgs{
 						MachinePools: rancher2.ClusterV2RkeConfigMachinePoolArray{

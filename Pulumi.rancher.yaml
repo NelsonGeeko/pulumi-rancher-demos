@@ -1,0 +1,11 @@
+config:
+  Rancher-Demo-Env:rancherEC2AccessKey:
+    secure: AAABACqotx4JxzjvcRcmC3mDKHUfhoWymkqfoZ3aVAX4r+m6dKua4OSaaP7V99J9jq9CzA==
+  Rancher-Demo-Env:rancherEC2SecretKey:
+    secure: AAABANo07OMETPQA7qQy5yJO2keXOj1ZvP5Q1KjYbPpKDOnWVK+F4p60mNwAthK4ci0sFcVNVAJzntCwShpu0dZoUw7a540X
+  aws:region: eu-west-2
+  rancher2:accessKey:
+    secure: AAABACrPvSF/Os5CwRGNxDye6pV+iwFq7CNADJTILHvrPs11L0hknixyxg==
+  rancher2:apiUrl: https://demo-hosted.rancher.cloud/
+  rancher2:secretKey:
+    secure: AAABAMXgoGCRbnEX7mr8frlwJrCIZYvIPYlzJkeER5Dpi6sErXEkgann6FCtFdPeukxuQZVEcumoP2JWlRNtcTIf2dxbT/Q4T4UsPVUNDXw9J1etcFg=
