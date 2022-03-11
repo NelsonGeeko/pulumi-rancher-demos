@@ -36,5 +36,3 @@ coverage.cov
 
 # By default, we don't check in yarn.lock files
 **/yarn.lock
-
-Pulumi.dev.yaml
